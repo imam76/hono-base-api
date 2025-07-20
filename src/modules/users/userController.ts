@@ -1,65 +1,61 @@
 /** @notice library imports */
 import type { Context } from "hono";
 import { StatusCodes } from "http-status-codes";
-// import type { BlankInput } from "hono/types";
 
 /// Local imports
 import { UserServices } from "./UserServices";
 import { PathRoutes } from "@/constants/routes";
-import { SuccessResponse } from "@/types/responses";
 import { Variables } from "./userDependencyMiddleware";
 import { Users } from "@/schemas";
+import { QueryParamsHelper } from "@/utils/QueryParamsHelper";
+import {
+  ErrorResponse,
+  SuccessPaginatedResponse,
+  SuccessResponse,
+} from "@/types/responses";
 
 export class UserController {
-  constructor(private todoService: UserServices) { }
+  constructor(private userService: UserServices) { }
 
   async createUser(c: Context<{ Variables: Variables }, PathRoutes.CREATE>) {
-    /// Grab fields
     const body = await c.req.json();
+    const user = await this.userService.create(body);
 
-    /// Save into database
-    const res = await this.todoService.create(body);
-
-    /// Response
-    return c.json<SuccessResponse<Partial<Users>>>(
-      {
-        success: true,
-        data: res,
-      },
+    return c.json<SuccessResponse<typeof user>>(
+      { success: true, data: user },
       StatusCodes.CREATED,
     );
   }
 
-  async getUserById(c: Context<{ Variables: Variables }, PathRoutes.GET_BY_ID>) {
+  async getUserById(
+    c: Context<{ Variables: Variables }, PathRoutes.GET_BY_ID>,
+  ) {
     const { id } = c.req.param();
-    const user = await this.todoService.getById(id);
+    const user = await this.userService.getById(id);
 
     if (!user) {
-      return c.json(
+      return c.json<ErrorResponse>(
         {
           success: false,
-          data: null,
+          error: "user not found",
+          code: "NOT_FOUND",
         },
         StatusCodes.NOT_FOUND,
       );
     }
 
-    return c.json<SuccessResponse<Users>>(
-      {
-        success: true,
-        data: user,
-      },
+    return c.json<SuccessResponse<typeof user>>(
+      { success: true, data: user },
       StatusCodes.OK,
     );
   }
 
   async getAllUsers(c: Context<{ Variables: Variables }, PathRoutes.GET_ALL>) {
-    const users = await this.todoService.getAll();
-    return c.json<SuccessResponse<Users[]>>(
-      {
-        success: true,
-        data: users,
-      },
+    const queryOptions = QueryParamsHelper.parseFromContext(c);
+    const result = await this.userService.getAll(queryOptions);
+
+    return c.json<SuccessPaginatedResponse<typeof result>>(
+      { success: true, ...result },
       StatusCodes.OK,
     );
   }
@@ -68,28 +64,46 @@ export class UserController {
     const { id } = c.req.param();
     const params = await c.req.json<Partial<Users>>();
 
-    // Filter out null values to match ICreateParams type
     const filteredParams = Object.fromEntries(
-      Object.entries(params).filter(([, value]) => value !== null)
+      Object.entries(params).filter(([, value]) => value !== null),
     );
 
-    const updatedUser = await this.todoService.update(id, filteredParams);
+    const updatedUser = await this.userService.update(id, filteredParams);
 
     if (!updatedUser) {
-      return c.json(
+      return c.json<ErrorResponse>(
         {
           success: false,
-          data: null,
+          error: "user not found",
+          code: "NOT_FOUND",
         },
         StatusCodes.NOT_FOUND,
       );
     }
 
-    return c.json<SuccessResponse<Partial<Users>>>(
-      {
-        success: true,
-        data: updatedUser,
-      },
+    return c.json<SuccessResponse<typeof updatedUser>>(
+      { success: true, data: updatedUser },
+      StatusCodes.OK,
+    );
+  }
+
+  async deleteUser(c: Context<{ Variables: Variables }, PathRoutes.GET_BY_ID>) {
+    const { id } = c.req.param();
+    const user = await this.userService.delete(id);
+
+    if (!user) {
+      return c.json<ErrorResponse>(
+        {
+          success: false,
+          error: "user not found",
+          code: "NOT_FOUND",
+        },
+        StatusCodes.NOT_FOUND,
+      );
+    }
+
+    return c.json<SuccessResponse<typeof user>>(
+      { success: true, data: user },
       StatusCodes.OK,
     );
   }

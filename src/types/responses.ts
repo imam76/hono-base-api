@@ -4,19 +4,10 @@ export type SuccessResponse<T> = {
   message?: string;
 };
 
-export type PaginatedResponse<T> = {
-  data: T[];
+export type SuccessPaginatedResponse<T> = {
   success: true;
   message?: string;
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-    nextPage?: number | null;
-    previousPage?: number | null;
-  };
-};
+} & T;
 
 export type ErrorResponse = {
   error: string;

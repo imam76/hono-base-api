@@ -12,14 +12,11 @@ export const todoRouter = new Hono({
   .use("*", injectTodoDependenciesMiddleware)
   /// Create todo
   .post(PathRoutes.CREATE, (c) => c.get("todoController").createTodo(c))
-
-  /// Get todo by id
-  .get(PathRoutes.GET_BY_ID, async (c) => {
-    const { id } = c.req.param();
-    return c.text(`Got todo, ${id}`);
-  })
-
   /// Get todos
-  .get(PathRoutes.GET_ALL, async (c) => {
-    return c.text(`Got todos`);
-  });
+  .get(PathRoutes.GET_ALL, (c) => c.get("todoController").getAllTodos(c))
+  /// Get todo by id
+  .get(PathRoutes.GET_BY_ID, (c) => c.get("todoController").getTodoById(c))
+  /// Update todo
+  .put(PathRoutes.GET_BY_ID, (c) => c.get("todoController").updateTodo(c))
+  /// Delete todo
+  .delete(PathRoutes.GET_BY_ID, (c) => c.get("todoController").deleteTodo(c));

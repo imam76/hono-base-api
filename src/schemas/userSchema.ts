@@ -1,5 +1,12 @@
 /** @notice library imports */
-import { boolean, pgTable, uuid, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 /// Core users table
 export const users = pgTable("users", {
@@ -22,6 +29,5 @@ export const users = pgTable("users", {
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 });
-
 
 export type Users = typeof users.$inferSelect;
