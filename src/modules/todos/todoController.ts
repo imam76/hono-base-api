@@ -5,14 +5,14 @@ import { StatusCodes } from "http-status-codes";
 
 /// Local imports
 import { TodoServices } from "./TodoServices";
-import { TodosRoutes } from "@/constants/routes";
+import { PathRoutes } from "@/constants/routes";
 import { SuccessResponse } from "@/types/responses";
 import { Variables } from "./todoDependencyMiddleware";
 
 export class TodoController {
-  constructor(private todoService: TodoServices) {}
+  constructor(private todoService: TodoServices) { }
 
-  async createTodo(c: Context<{ Variables: Variables }, TodosRoutes.CREATE>) {
+  async createTodo(c: Context<{ Variables: Variables }, PathRoutes.CREATE>) {
     /// Grab fields
     const { description } = await c.req.json();
 
