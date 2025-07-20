@@ -4,7 +4,7 @@ import { Hono } from "hono";
 
 /// Local imports
 import { handlers } from "@/middlewares";
-import { todoRouter } from "@/todos/todoRouter";
+import { todoRouter } from "@/modules/todos/todoRouter";
 import { ApplicationRoutes } from "@/constants/routes";
 
 /// Core app
