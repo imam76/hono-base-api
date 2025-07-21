@@ -13,5 +13,13 @@ export type ErrorResponse = {
   error: string;
   success: false;
   details?: string;
-  code: "VALIDATION_ERROR" | "NOT_FOUND" | "SERVER_ERROR";
+  code:
+    | "VALIDATION_ERROR"
+    | "NOT_FOUND"
+    | "SERVER_ERROR"
+    | "UNAUTHORIZED"
+    | "FORBIDDEN"
+    | "CONFLICT"
+    | "BAD_REQUEST"
+    | "INTERNAL_ERROR";
 };

@@ -15,7 +15,7 @@ import {
 } from "@/types/responses";
 
 export class UserController {
-  constructor(private userService: UserServices) { }
+  constructor(private userService: UserServices) {}
 
   async createUser(c: Context<{ Variables: Variables }, PathRoutes.CREATE>) {
     const body = await c.req.json();
