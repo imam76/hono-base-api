@@ -1,41 +1,55 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Context } from "hono";
-import type { QueryOptions } from "./QueryBuilder";
+
+export interface QueryOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  searchBy?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  filters?: Record<string, string | number | boolean>;
+}
 
 export class QueryParamsHelper {
   static parseFromContext(c: Context): QueryOptions {
-    const page = Number(c.req.query("page")) || 1;
-    const limit = Math.min(Number(c.req.query("limit")) || 10, 100);
-    const sortBy = c.req.query("sortBy");
-    const sortOrder = c.req.query("sortOrder") === "desc" ? "desc" : "asc";
-    const search = c.req.query("search");
-    const searchBy = c.req.query("searchBy");
+    const params = new URL(c.req.url).searchParams;
 
-    const filters: Record<string, any> = {};
-    const filterQueries = c.req.queries("filter") || [];
+    const page = Math.max(parseInt(params.get("page") || "1"), 1);
+    const limit = Math.min(parseInt(params.get("limit") || "10"), 100);
+    const search = params.get("search") || undefined;
+    const searchBy = params.get("searchBy") || undefined;
+    const sortBy = params.get("sortBy") || undefined;
+    const sortOrder = params.get("sortOrder") === "desc" ? "desc" : "asc";
 
-    for (const filterQuery of filterQueries) {
-      const [field, value] = filterQuery.split(":");
-      if (field && value) {
-        filters[field] = this.parseValue(value);
+    // Parse filters dengan type conversion
+    const filters: Record<string, string | number | boolean> = {};
+    const reserved = [
+      "page",
+      "limit",
+      "search",
+      "searchBy",
+      "sortBy",
+      "sortOrder",
+    ];
+
+    for (const [key, value] of params.entries()) {
+      if (!reserved.includes(key) && value) {
+        // Convert boolean dan number
+        if (value === "true") filters[key] = true;
+        else if (value === "false") filters[key] = false;
+        else if (!isNaN(Number(value))) filters[key] = Number(value);
+        else filters[key] = value;
       }
     }
 
     return {
       page,
       limit,
-      sortBy,
-      sortOrder,
       search,
       searchBy,
-      filters,
+      sortBy,
+      sortOrder,
+      filters: Object.keys(filters).length > 0 ? filters : undefined,
     };
-  }
-
-  private static parseValue(value: string): string | number | boolean {
-    if (value === "true") return true;
-    if (value === "false") return false;
-    if (!isNaN(Number(value))) return Number(value);
-    return value;
   }
 }
