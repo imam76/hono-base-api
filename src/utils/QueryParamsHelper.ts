@@ -32,6 +32,7 @@ export class QueryParamsHelper {
       "sortOrder",
     ];
 
+    // Iterate through all params and convert types
     for (const [key, value] of params.entries()) {
       if (!reserved.includes(key) && value) {
         // Convert boolean dan number
